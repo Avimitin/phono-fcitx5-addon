@@ -58,6 +58,16 @@ Phono 配置通常保存在 `~/.config/fcitx5/conf/phono.conf`，用户词典和
 
 Phono settings normally live in `~/.config/fcitx5/conf/phono.conf`, with the user dictionary and history under `~/.local/share/fcitx5/phono/`. `XDG_CONFIG_HOME` and `XDG_DATA_HOME` override these locations. The model directory is selected by the user, is separate from these settings, and is not replaced by package updates.
 
+## 扩展词库 / Extra dictionaries
+
+Phono 与 Fcitx5 拼音共用 `pinyin/dictionaries/*.dict` 扩展词库，支持发行版提供的萌娘、维基百科等 libime 二进制词库包。个人词库可放在 `~/.local/share/fcitx5/pinyin/dictionaries/`（或 `$XDG_DATA_HOME/fcitx5/pinyin/dictionaries/`），同名文件优先于系统词库。创建空文件 `词库名.dict.disable` 可禁用对应词库。安装、移除或禁用词库后，重新加载 Fcitx5 配置或重启 Fcitx5 生效。
+
+Phono shares Fcitx5 Pinyin's `pinyin/dictionaries/*.dict` extra dictionaries, including distribution packages for Moegirl, Wikipedia and other libime binary dictionaries. Place personal dictionaries in `~/.local/share/fcitx5/pinyin/dictionaries/` (or `$XDG_DATA_HOME/fcitx5/pinyin/dictionaries/`); user files take precedence over system files with the same name. Create an empty `name.dict.disable` file to disable that dictionary. Reload Fcitx5's configuration or restart Fcitx5 after installing, removing or disabling dictionaries.
+
+扩展词库用于全拼和双拼的词典候选，模型排序和 Phono 独立的用户学习记录保持原有行为。
+
+Extra dictionaries supply dictionary candidates for both Pinyin and Shuangpin. Model ranking and Phono's separate personal learning records retain their existing behavior.
+
 ## 使用 / Usage
 
 「显示预编辑框」默认关闭，不在应用输入框中显示尚未提交的文字；候选窗仍显示拼音。开启后，支持内嵌预编辑的应用会在输入框中显示预编辑文本，拼音不再重复显示在候选窗；不支持的应用仍在候选窗中显示拼音。

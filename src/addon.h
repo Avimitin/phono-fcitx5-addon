@@ -92,6 +92,7 @@ private:
     void recordCommitHistory(fcitx::InputContext *, const std::string &prior, const std::string &text);
     bool sensitive(fcitx::InputContext *) const;
     void configChanged(bool shuangpinChanged);
+    void loadExtraDict();
     void loadLearning();
     void saveLearning();
     uint32_t frequency(const std::string &pinyin, const std::string &text) const;

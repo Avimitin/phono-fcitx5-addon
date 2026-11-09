@@ -29,8 +29,10 @@
 #include <libime/pinyin/pinyindictionary.h>
 #include <libime/pinyin/pinyinencoder.h>
 #include <algorithm>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
+#include <map>
 #include <sstream>
 #include <unordered_set>
 
@@ -38,6 +40,18 @@ namespace phono_fcitx {
 using namespace fcitx;
 namespace {
 FCITX_DEFINE_LOG_CATEGORY(contextLog, "phono-context")
+auto locateExtraDictFiles(const char *suffix) {
+#if __has_include(<fcitx-utils/standardpaths.h>)
+    return StandardPaths::global().locate(StandardPathsType::PkgData,
+        "pinyin/dictionaries", pathfilter::extension(suffix));
+#else
+    std::map<std::filesystem::path, std::filesystem::path> paths;
+    for (const auto &[name, file] : StandardPath::global().multiOpen(
+             StandardPath::Type::PkgData, "pinyin/dictionaries", O_RDONLY, filter::Suffix(suffix)))
+        paths.emplace(name, file.path());
+    return paths;
+#endif
+}
 auto openUserData(const std::string &name) {
 #if __has_include(<fcitx-utils/standardpaths.h>)
     return StandardPaths::global().open(StandardPathsType::PkgData, name, StandardPathsMode::User);
@@ -657,7 +671,26 @@ void Engine::reloadConfig() {
     RawConfig raw;
     readAsIni(raw, "conf/phono.conf");
     config_.load(raw);
+    loadExtraDict();
     configChanged(previousScheme != *config_.shuangpin);
+}
+void Engine::loadExtraDict() {
+    const auto files = locateExtraDictFiles(".dict");
+    std::unordered_set<std::filesystem::path> disabled;
+    for (const auto &[name, path] : locateExtraDictFiles(".disable"))
+        disabled.insert(name.stem());
+
+    auto *dict = ime_->dict();
+    dict->removeFrom(libime::PinyinDictionary::UserDict + 1);
+    for (const auto &[name, path] : files) {
+        if (disabled.contains(name)) continue;
+        dict->addEmptyDict();
+        try {
+            dict->load(dict->dictSize() - 1, path.c_str(), libime::PinyinDictFormat::Binary);
+        } catch (const std::exception &e) {
+            FCITX_WARN() << "Phono: failed to load pinyin dictionary " << path.string() << ": " << e.what();
+        }
+    }
 }
 void Engine::save() {
     safeSaveAsIni(config_, "conf/phono.conf");
