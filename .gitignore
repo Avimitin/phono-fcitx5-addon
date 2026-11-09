@@ -3,6 +3,9 @@
 /ci/.pixi/
 /.sdk/
 /.cache/
+/.direnv/
+/result
+/result-*
 
 # Build, staging and downloadable binaries
 /build*/

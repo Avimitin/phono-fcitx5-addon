@@ -1,0 +1,13 @@
+diff --git a/third_party/executorch/tools/cmake/Utils.cmake b/third_party/executorch/tools/cmake/Utils.cmake
+--- a/third_party/executorch/tools/cmake/Utils.cmake
++++ b/third_party/executorch/tools/cmake/Utils.cmake
+@@ -222,6 +222,9 @@ endfunction()
+ # parent scope. In particular, it will NOT set any of the following: -
+ # TORCH_FOUND - TORCH_LIBRARY - TORCH_CXX_FLAGS
+ function(find_package_torch_headers)
++  if(TORCH_INCLUDE_DIRS)
++    return()
++  endif()
+   # We implement this way rather than using find_package so that
+   # cross-compilation can still use the host's installed copy of torch, since
+   # the headers should be fine.

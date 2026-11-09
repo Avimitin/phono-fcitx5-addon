@@ -130,6 +130,33 @@ Restart Fcitx5 after removal. Models, personal settings, and the user dictionary
 
 ## 开发 / Development
 
+### Nix（x86_64-linux）
+
+Flake 提供 `phono-fcitx5-addon`（默认包）、`phono-core-sdk` 和 `phono-model`（v2.2 W8A8）。SDK 从 `ci/core-sdk.json` 指定版本的源码构建，并编译上游锁定的 ExecuTorch、XNNPACK 及所需依赖。代码生成使用 PyTorch 2.14.0 的 torchgen 源码。首次构建会编译推理后端，需要较长时间。默认构建会运行测试；模型单独构建，日常开发无需下载模型。
+
+The flake provides `phono-fcitx5-addon` (the default package), `phono-core-sdk`, and `phono-model` (v2.2 W8A8). The SDK is built from the source version in `ci/core-sdk.json`, together with upstream-pinned ExecuTorch, XNNPACK, and their required dependencies. Code generation uses the torchgen sources from PyTorch 2.14.0. The first build takes longer while compiling the inference backend. The default build runs the tests. The model is a separate package and is not required for routine development.
+
+```sh
+nix build
+nix build .#phono-model --out-link result-model
+nix flake check
+
+nix develop
+cmake -S . -B build/nix -G Ninja -DCMAKE_BUILD_TYPE=Debug \
+  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPHONO_SDK_PREFIX="$PHONO_SDK_PREFIX"
+cmake --build build/nix
+ctest --test-dir build/nix --output-on-failure
+# 可选：验证真实模型推理 / Optional: test real model inference
+PHONO_TEST_MODEL_DIR="$(nix build .#phono-model --no-link --print-out-paths)" \
+  ctest --test-dir build/nix --output-on-failure
+```
+
+开发环境包含编译器、CMake、Ninja、SDK、Fcitx5/libime 开发包、标点和全角模块，以及 clangd、GDB、nixfmt。`nix fmt` 格式化 Nix 文件。在 NixOS 或 Home Manager 中使用时，将 addon 包和 `pkgs.qt6Packages.fcitx5-chinese-addons` 一起加入 Fcitx5 的 `addons`，并将 Phono 的模型目录设为模型包路径。
+
+The development shell includes the compiler, CMake, Ninja, SDK, Fcitx5/libime development packages, punctuation and full-width modules, clangd, GDB, and nixfmt. Use `nix fmt` to format Nix files. For NixOS or Home Manager, add the addon package and `pkgs.qt6Packages.fcitx5-chinese-addons` to Fcitx5's `addons`, and set Phono's model directory to the model package path.
+
+### Pixi
+
 本地构建需要 Linux、Pixi ≥ 0.81、支持 C++20 的宿主编译器、与宿主匹配的 Fcitx5 ≥ 5.1.7 / libime ≥ 1.1.5 开发包，以及 Fcitx5 标点、全角模块。本仓库独立构建，使用 `ci/core-sdk.json` 固定的 phono-core Release SDK，不需要 core 源码或相邻仓库。
 
 Local builds require Linux, Pixi ≥ 0.81, a host compiler with C++20 support, Fcitx5 ≥ 5.1.7 / libime ≥ 1.1.5 development packages matching the host, and the Fcitx5 punctuation and full-width modules. This repository builds independently against the phono-core Release SDK pinned in `ci/core-sdk.json`, without core sources or adjacent repositories.

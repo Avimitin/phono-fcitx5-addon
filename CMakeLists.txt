@@ -120,7 +120,9 @@ if(BUILD_TESTING)
     set_tests_properties(load_tests PROPERTIES ENVIRONMENT
         "XDG_CONFIG_HOME=${CMAKE_CURRENT_BINARY_DIR}/load-env/config;XDG_DATA_HOME=${CMAKE_CURRENT_BINARY_DIR}/load-env/data;FCITX_DATA_DIRS=${CMAKE_CURRENT_BINARY_DIR}/data:/usr/share/fcitx5;FCITX_ADDON_DIRS=${CMAKE_CURRENT_BINARY_DIR}")
     set_tests_properties(feature_tests PROPERTIES ENVIRONMENT
-        "XDG_CONFIG_HOME=${CMAKE_CURRENT_BINARY_DIR}/feature-env/config;XDG_DATA_HOME=${CMAKE_CURRENT_BINARY_DIR}/feature-env/data;FCITX_DATA_DIRS=${CMAKE_CURRENT_BINARY_DIR}/data:${FCITX_INSTALL_PKGDATADIR};FCITX_ADDON_DIRS=${CMAKE_CURRENT_BINARY_DIR}:${FCITX_INSTALL_ADDONDIR}")
+        "XDG_CONFIG_HOME=${CMAKE_CURRENT_BINARY_DIR}/feature-env/config;XDG_DATA_HOME=${CMAKE_CURRENT_BINARY_DIR}/feature-env/data"
+        ENVIRONMENT_MODIFICATION
+        "FCITX_DATA_DIRS=path_list_prepend:${FCITX_INSTALL_PKGDATADIR};FCITX_DATA_DIRS=path_list_prepend:${CMAKE_CURRENT_BINARY_DIR}/data;FCITX_ADDON_DIRS=path_list_prepend:${FCITX_INSTALL_ADDONDIR};FCITX_ADDON_DIRS=path_list_prepend:${CMAKE_CURRENT_BINARY_DIR}")
     set_tests_properties(package_tests worker_tests addon_tests load_tests shuangpin_tests presentation_tests feature_tests PROPERTIES TIMEOUT 30)
 endif()
 include(cmake/Packaging.cmake)
